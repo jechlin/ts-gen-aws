@@ -2,16 +2,10 @@ package org.jamieechlin.ts
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.LambdaLogger
+import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
-import cz.habarta.typescript.generator.ClassMapping
-import cz.habarta.typescript.generator.Input
-import cz.habarta.typescript.generator.JsonLibrary
-import cz.habarta.typescript.generator.Settings
-import cz.habarta.typescript.generator.TypeScriptFileType
-import cz.habarta.typescript.generator.TypeScriptGenerator
-import cz.habarta.typescript.generator.TypeScriptOutputKind
+import cz.habarta.typescript.generator.*
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
@@ -42,8 +36,10 @@ class Lambda {
 
         Settings conversionSettings
         try {
+            def objectMapper = new ObjectMapper()
+            objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true)
             conversionSettings = params.settings ?
-                new ObjectMapper().readValue(params.settings, ConversionSettings).toSettings() :
+                objectMapper.readValue(params.settings, ConversionSettings).toSettings() :
                 settings()
         } catch (any) {
             return JsonOutput.toJson([
