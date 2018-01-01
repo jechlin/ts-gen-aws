@@ -71,7 +71,7 @@ class ElectricCar extends Car {
         data-plugins="transform-async-to-generator">
 
     const json = {
-        "$schema"       : "http://myserver/foo-schema.json",
+        "$schema"       : "http://dummy/tsgen.json",
         "outputFileType": "declarationFile",
         "outputKind"    : "global",
         "jsonLibrary"   : "jackson2",
@@ -391,7 +391,7 @@ class ElectricCar extends Car {
 
         monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
             schemas : [{
-                uri: "http://myserver/foo-schema.json",
+                uri: "http://dummy/tsgen.json",
                 schema,
             }],
             validate: true,
