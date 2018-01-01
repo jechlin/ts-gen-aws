@@ -1,10 +1,12 @@
 package org.jamieechlin.ts
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import cz.habarta.typescript.generator.*
 
 /**
  * Copied from cz.habarta.typescript.generator.gradle.GenerateTask
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 class ConversionSettings {
     public String outputFile
     public TypeScriptFileType outputFileType
