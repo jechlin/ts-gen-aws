@@ -1,0 +1,119 @@
+// -*- coding: utf-8; mode: groovy -*-
+
+import com.amazonaws.services.lambda.model.InvocationType;
+
+import jp.classmethod.aws.gradle.lambda.AWSLambdaDeleteFunctionTask;
+import jp.classmethod.aws.gradle.lambda.AWSLambdaInvokeTask;
+import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask;
+import jp.classmethod.aws.gradle.lambda.VpcConfigWrapper
+
+buildscript {
+	repositories {
+		mavenCentral()
+		maven { url "https://plugins.gradle.org/m2/" }
+
+	}
+	dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+        classpath "jp.classmethod.aws:gradle-aws-plugin:0.30"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
+	}
+}
+
+apply plugin: "io.spring.dependency-management"
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'base'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+apply plugin: "jp.classmethod.aws.lambda"
+
+dependencyManagement {
+    imports {
+        mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.228'
+    }
+}
+
+
+repositories {
+    mavenLocal()
+	jcenter()
+}
+dependencies {
+    // compile 'com.amazonaws:aws-java-sdk-lambda'
+    compile 'com.amazonaws:aws-lambda-java-core:1.2.0'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-lambda'// , version: '1.11.255'
+    compile 'org.codehaus.groovy:groovy-all:2.4.12'
+    compile 'cz.habarta.typescript-generator:typescript-generator-core:1.30-SNAPSHOT'
+    compile ('cz.habarta.typescript-generator:typescript-generator-gradle-plugin:1.30-SNAPSHOT@jar') {
+		transitive = false
+	}
+
+	testCompile('org.spockframework:spock-core:1.2-groovy-2.4-SNAPSHOT') {
+		exclude module: "junit-dep"
+		exclude module: "groovy-all"
+	}
+}
+
+aws {
+	profileName = "ts-gen-aws"
+	region = "eu-west-1"
+}
+
+println aws.accountId
+
+lambda {
+	region = "eu-west-1"
+}
+
+task zip(type: Zip) {
+	from "$buildDir/classes/groovy/main"
+	destinationDir file("build")
+}
+
+task migrateFunction(type: AWSLambdaMigrateFunctionTask, dependsOn: shadowJar) {
+	functionName = "tsGen"
+	role = "arn:aws:iam::${aws.accountId}:role/lambda_basic_execution"
+	zipFile = file('build/libs/ts-gen-aws-all.jar')
+	handler = "org.jamieechlin.ts.Lambda::myHandler"
+	runtime = "java8"
+
+	// environment = [
+	//	TARGET: "ascii"
+	// ]
+
+	// optional publish value
+	publish = true
+}
+
+task migrateFunctionWithVpc(type: AWSLambdaMigrateFunctionTask, dependsOn: zip) {
+	functionName = "foobar"
+	role = "arn:aws:iam::${aws.accountId}:role/lambda_basic_execution"
+	zipFile = zip.archivePath
+	handler = "DecodeBase64.handler"
+	runtime = "Nodejs43"
+
+	// optional VPC config
+	vpc = new VpcConfigWrapper()
+	vpc.subnetIds = ["subnet-A", "subnet-B"]
+	vpc.securityGroupIds = ["sg-A", "sg-B"]
+
+}
+
+task invokeFunction(type: AWSLambdaInvokeTask) {
+    functionName = "tsGen"
+	invocationType = InvocationType.RequestResponse
+	payload = file("sample-input/input.txt")
+	doLast {
+		println "Lambda function result: " + new String(invokeResult.payload.array(), "UTF-8")
+	}
+}
+
+task deleteFunction(type: AWSLambdaDeleteFunctionTask) {
+	functionName = "foobar"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.4.1'
+}
+

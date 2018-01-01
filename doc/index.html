@@ -1,0 +1,438 @@
+<html>
+<head>
+    <title>Typescript Generator Playground</title>
+    <script src="https://unpkg.com/babel-polyfill/dist/polyfill.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/whatwg-fetch"></script>
+    <link rel="stylesheet" href="https://unpkg.com/codemirror@5.33.0/lib/codemirror.css">
+    <link rel="stylesheet" href="https://unpkg.com/codemirror@5.33.0/theme/cobalt.css">
+    <script src="https://unpkg.com/codemirror@5.33.0/lib/codemirror.js"></script>
+    <script src="https://unpkg.com/codemirror@5.33.0/mode/groovy/groovy.js"></script>
+    <script src="https://unpkg.com/codemirror@5.33.0/mode/javascript/javascript.js"></script>
+    <script src="https://unpkg.com/jsoneditor@5.13.1/dist/jsoneditor.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/jsoneditor@5.13.1/dist/jsoneditor.css">
+    <!--<link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap@next/dist/css/bootstrap.min.css"/>-->
+</head>
+<body style="margin: 10px 10px 10px 10px">
+
+<h1>Typescript Generator Playground</h1>
+
+<p>
+    See <a href="https://github.com/vojtechhabarta/typescript-generator">typescript-generator</a>
+</p>
+
+<form>
+    <div style="width: 575px; height: 641px; display: inline-flex">
+<textarea id="groovy">
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeName
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+@JsonSubTypes([
+    @JsonSubTypes.Type(DieselCar.class),
+    @JsonSubTypes.Type(ElectricCar.class),
+])
+class Car {
+    public String name
+}
+
+class DieselCar extends Car {
+    public double fuelTankCapacityInLiters
+}
+
+class ElectricCar extends Car {
+    public double batteryCapacityInKWh
+}
+</textarea>
+    </div>
+
+
+    <div style="width: 575px; height: 641px; float: right;">
+        <textarea id="output" style="width: 575px; height: 541px;"></textarea>
+    </div>
+
+    <div style="clear: both;"></div>
+
+    <input type="button" value="Convert" id="convert" style="margin-top: 10px">
+
+    <div style="margin-top: 10px; clear: both;">
+
+        <h1>Options</h1>
+        <div id="jsoneditor"></div>
+
+    </div>
+
+</form>
+
+<script language="JavaScript" type="text/babel" data-presets="es2015,stage-3"
+        data-plugins="transform-async-to-generator">
+
+    let cmOptions = {
+        theme      : 'cobalt',
+        lineNumbers: true,
+        indentUnit : 4,
+        // mode: "text/typescript"
+    };
+    const cmCode = CodeMirror.fromTextArea(document.getElementById('groovy'), {
+            ...cmOptions,
+            mode: 'text/x-groovy',
+        }
+    )
+    cmCode.setSize(575, 641)
+
+    const cmTs = CodeMirror.fromTextArea(document.getElementById('output'), {
+            ...cmOptions,
+            mode: 'text/typescript',
+        }
+    )
+    cmTs.setSize(575, 641)
+
+    let btnConvert = document.getElementById('convert');
+    btnConvert.addEventListener("click", async (e) => {
+        btnConvert.disabled = true
+        try {
+            const response = await fetch('https://buoulcbv4f.execute-api.eu-west-1.amazonaws.com/prod', {
+                method: 'POST',
+                body  : JSON.stringify({
+                    input   : cmCode.getValue(),
+                    settings: editor.getText(),
+                })
+            })
+
+            const jsonResp = await response.json()
+
+            // not sure why this is double json-encoded
+            const json = JSON.parse(jsonResp)
+
+            if ("error" in json) {
+                cmTs.setValue(json.error)
+            }
+            else {
+                cmTs.setValue(json.output)
+            }
+        }
+        finally {
+            btnConvert.disabled = false
+        }
+    });
+
+    // <editor-fold desc="schema">
+    var schema = {
+        "definitions": {
+            "ClassMapping"        : {
+                "enum": [
+                    "asClasses",
+                    "asInterfaces"
+                ],
+                "type": "string"
+            },
+            "DateMapping"         : {
+                "enum": [
+                    "asDate",
+                    "asNumber",
+                    "asString"
+                ],
+                "type": "string"
+            },
+            "EnumMapping"         : {
+                "enum": [
+                    "asEnum",
+                    "asInlineUnion",
+                    "asNumberBasedEnum",
+                    "asUnion"
+                ],
+                "type": "string"
+            },
+            "JaxrsNamespacing"    : {
+                "enum": [
+                    "byAnnotation",
+                    "perResource",
+                    "singleObject"
+                ],
+                "type": "string"
+            },
+            "JsonLibrary"         : {
+                "enum": [
+                    "jackson1",
+                    "jackson2",
+                    "jaxb"
+                ],
+                "type": "string"
+            },
+            "OptionalProperties"  : {
+                "enum": [
+                    "all",
+                    "useLibraryDefinition",
+                    "useSpecifiedAnnotations"
+                ],
+                "type": "string"
+            },
+            "StringQuotes"        : {
+                "enum": [
+                    "doubleQuotes",
+                    "singleQuotes"
+                ],
+                "type": "string"
+            },
+            "TypeScriptFileType"  : {
+                "enum": [
+                    "declarationFile",
+                    "implementationFile"
+                ],
+                "type": "string"
+            },
+            "TypeScriptOutputKind": {
+                "enum": [
+                    "ambientModule",
+                    "global",
+                    "module"
+                ],
+                "type": "string"
+            }
+        },
+        "properties" : {
+            "addTypeNamePrefix"                   : {
+                "type": "string"
+            },
+            "addTypeNameSuffix"                   : {
+                "type": "string"
+            },
+            "classPatterns"                       : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "classes"                             : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "classesFromAutomaticJaxrsApplication": {
+                "type": "boolean"
+            },
+            "classesFromJaxrsApplication"         : {
+                "type": "string"
+            },
+            "customTypeMappings"                  : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "customTypeNaming"                    : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "customTypeNamingFunction"            : {
+                "type": "string"
+            },
+            "customTypeProcessor"                 : {
+                "type": "string"
+            },
+            "debug"                               : {
+                "type": "boolean"
+            },
+            "declarePropertiesAsOptional"         : {
+                "type": "boolean"
+            },
+            "declarePropertiesAsReadOnly"         : {
+                "type": "boolean"
+            },
+            "disableJackson2ModuleDiscovery"      : {
+                "type": "boolean"
+            },
+            "disableTaggedUnions"                 : {
+                "type": "boolean"
+            },
+            "displaySerializerWarning"            : {
+                "type": "boolean"
+            },
+            "excludeClassPatterns"                : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "excludeClasses"                      : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "extensionClasses"                    : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "extensions"                          : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "generateJaxrsApplicationClient"      : {
+                "type": "boolean"
+            },
+            "generateJaxrsApplicationInterface"   : {
+                "type": "boolean"
+            },
+            "generateNpmPackageJson"              : {
+                "type": "boolean"
+            },
+            "ignoreSwaggerAnnotations"            : {
+                "type": "boolean"
+            },
+            "importDeclarations"                  : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "includePropertyAnnotations"          : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "indentString"                        : {
+                "type": "string"
+            },
+            "jackson2ModuleDiscovery"             : {
+                "type": "boolean"
+            },
+            "jackson2Modules"                     : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "javadocXmlFiles"                     : {
+                "items": {},
+                "type" : "array"
+            },
+            "jaxrsNamespacing"                    : {
+                "$ref": "#/definitions/JaxrsNamespacing"
+            },
+            "jaxrsNamespacingAnnotation"          : {
+                "type": "string"
+            },
+            "jsonLibrary"                         : {
+                "$ref": "#/definitions/JsonLibrary"
+            },
+            "mapClasses"                          : {
+                "$ref": "#/definitions/ClassMapping"
+            },
+            "mapClassesAsClassesPatterns"         : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "mapDate"                             : {
+                "$ref": "#/definitions/DateMapping"
+            },
+            "mapEnum"                             : {
+                "$ref": "#/definitions/EnumMapping"
+            },
+            "mapPackagesToNamespaces"             : {
+                "type": "boolean"
+            },
+            "module"                              : {
+                "type": "string"
+            },
+            "namespace"                           : {
+                "type": "string"
+            },
+            "noFileComment"                       : {
+                "type": "boolean"
+            },
+            "nonConstEnums"                       : {
+                "type": "boolean"
+            },
+            "npmName"                             : {
+                "type": "string"
+            },
+            "npmVersion"                          : {
+                "type": "string"
+            },
+            "optionalAnnotations"                 : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "optionalProperties"                  : {
+                "$ref": "#/definitions/OptionalProperties"
+            },
+            "outputFile"                          : {
+                "type": "string"
+            },
+            "outputFileType"                      : {
+                "$ref": "#/definitions/TypeScriptFileType"
+            },
+            "outputKind"                          : {
+                "$ref": "#/definitions/TypeScriptOutputKind"
+            },
+            "referencedFiles"                     : {
+                "items": {
+                    "type": "string"
+                },
+                "type" : "array"
+            },
+            "removeTypeNamePrefix"                : {
+                "type": "string"
+            },
+            "removeTypeNameSuffix"                : {
+                "type": "string"
+            },
+            "restOptionsType"                     : {
+                "type": "string"
+            },
+            "restResponseType"                    : {
+                "type": "string"
+            },
+            "sortDeclarations"                    : {
+                "type": "boolean"
+            },
+            "sortTypeDeclarations"                : {
+                "type": "boolean"
+            },
+            "stringQuotes"                        : {
+                "$ref": "#/definitions/StringQuotes"
+            },
+            "umdNamespace"                        : {
+                "type": "string"
+            }
+        },
+        "type"       : "object"
+    }
+    // </editor-fold>
+
+    var json = {
+        "outputFileType": "declarationFile",
+        "outputKind"    : "global",
+        "jsonLibrary"   : "jackson2",
+        "noFileComment" : true,
+        "excludeClasses": [
+            "groovy.lang.GroovyObject"
+        ]
+    };
+
+    var options = {
+        schema: schema,
+    };
+
+    // create the editor
+    var container = document.getElementById('jsoneditor');
+    var editor = new JSONEditor(container, options, json);
+
+</script>
+
+</body>
+</html>

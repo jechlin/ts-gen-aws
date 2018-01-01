@@ -1,0 +1,297 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "ClassMapping": {
+            "enum": [
+                "asClasses",
+                "asInterfaces"
+            ],
+            "type": "string"
+        },
+        "DateMapping": {
+            "enum": [
+                "asDate",
+                "asNumber",
+                "asString"
+            ],
+            "type": "string"
+        },
+        "EnumMapping": {
+            "enum": [
+                "asEnum",
+                "asInlineUnion",
+                "asNumberBasedEnum",
+                "asUnion"
+            ],
+            "type": "string"
+        },
+        "JaxrsNamespacing": {
+            "enum": [
+                "byAnnotation",
+                "perResource",
+                "singleObject"
+            ],
+            "type": "string"
+        },
+        "JsonLibrary": {
+            "enum": [
+                "jackson1",
+                "jackson2",
+                "jaxb"
+            ],
+            "type": "string"
+        },
+        "OptionalProperties": {
+            "enum": [
+                "all",
+                "useLibraryDefinition",
+                "useSpecifiedAnnotations"
+            ],
+            "type": "string"
+        },
+        "StringQuotes": {
+            "enum": [
+                "doubleQuotes",
+                "singleQuotes"
+            ],
+            "type": "string"
+        },
+        "TypeScriptFileType": {
+            "enum": [
+                "declarationFile",
+                "implementationFile"
+            ],
+            "type": "string"
+        },
+        "TypeScriptOutputKind": {
+            "enum": [
+                "ambientModule",
+                "global",
+                "module"
+            ],
+            "type": "string"
+        }
+    },
+    "properties": {
+        "addTypeNamePrefix": {
+            "type": "string"
+        },
+        "addTypeNameSuffix": {
+            "type": "string"
+        },
+        "classPatterns": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "classes": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "classesFromAutomaticJaxrsApplication": {
+            "type": "boolean"
+        },
+        "classesFromJaxrsApplication": {
+            "type": "string"
+        },
+        "customTypeMappings": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "customTypeNaming": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "customTypeNamingFunction": {
+            "type": "string"
+        },
+        "customTypeProcessor": {
+            "type": "string"
+        },
+        "debug": {
+            "type": "boolean"
+        },
+        "declarePropertiesAsOptional": {
+            "type": "boolean"
+        },
+        "declarePropertiesAsReadOnly": {
+            "type": "boolean"
+        },
+        "disableJackson2ModuleDiscovery": {
+            "type": "boolean"
+        },
+        "disableTaggedUnions": {
+            "type": "boolean"
+        },
+        "displaySerializerWarning": {
+            "type": "boolean"
+        },
+        "excludeClassPatterns": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "excludeClasses": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "extensionClasses": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "extensions": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "generateJaxrsApplicationClient": {
+            "type": "boolean"
+        },
+        "generateJaxrsApplicationInterface": {
+            "type": "boolean"
+        },
+        "generateNpmPackageJson": {
+            "type": "boolean"
+        },
+        "ignoreSwaggerAnnotations": {
+            "type": "boolean"
+        },
+        "importDeclarations": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "includePropertyAnnotations": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "indentString": {
+            "type": "string"
+        },
+        "jackson2ModuleDiscovery": {
+            "type": "boolean"
+        },
+        "jackson2Modules": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "javadocXmlFiles": {
+            "items": {
+            },
+            "type": "array"
+        },
+        "jaxrsNamespacing": {
+            "$ref": "#/definitions/JaxrsNamespacing"
+        },
+        "jaxrsNamespacingAnnotation": {
+            "type": "string"
+        },
+        "jsonLibrary": {
+            "$ref": "#/definitions/JsonLibrary"
+        },
+        "mapClasses": {
+            "$ref": "#/definitions/ClassMapping"
+        },
+        "mapClassesAsClassesPatterns": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "mapDate": {
+            "$ref": "#/definitions/DateMapping"
+        },
+        "mapEnum": {
+            "$ref": "#/definitions/EnumMapping"
+        },
+        "mapPackagesToNamespaces": {
+            "type": "boolean"
+        },
+        "module": {
+            "type": "string"
+        },
+        "namespace": {
+            "type": "string"
+        },
+        "noFileComment": {
+            "type": "boolean"
+        },
+        "nonConstEnums": {
+            "type": "boolean"
+        },
+        "npmName": {
+            "type": "string"
+        },
+        "npmVersion": {
+            "type": "string"
+        },
+        "optionalAnnotations": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "optionalProperties": {
+            "$ref": "#/definitions/OptionalProperties"
+        },
+        "outputFile": {
+            "type": "string"
+        },
+        "outputFileType": {
+            "$ref": "#/definitions/TypeScriptFileType"
+        },
+        "outputKind": {
+            "$ref": "#/definitions/TypeScriptOutputKind"
+        },
+        "referencedFiles": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "removeTypeNamePrefix": {
+            "type": "string"
+        },
+        "removeTypeNameSuffix": {
+            "type": "string"
+        },
+        "restOptionsType": {
+            "type": "string"
+        },
+        "restResponseType": {
+            "type": "string"
+        },
+        "sortDeclarations": {
+            "type": "boolean"
+        },
+        "sortTypeDeclarations": {
+            "type": "boolean"
+        },
+        "stringQuotes": {
+            "$ref": "#/definitions/StringQuotes"
+        },
+        "umdNamespace": {
+            "type": "string"
+        }
+    },
+    "type": "object"
+}
+
